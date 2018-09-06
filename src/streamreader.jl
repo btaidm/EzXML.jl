@@ -467,6 +467,24 @@ function Base.getindex(reader::StreamReader, key::Union{Integer,AbstractString})
 end
 
 """
+    isempty(reader::StreamReader)
+
+Check if current node of `reader` is an empty element
+"""
+function Base.isempty(reader::StreamReader)
+    if nodetype(reader) != READER_ELEMENT
+        throw(ArgumentError("Reader not an Element Node"))
+    end
+    r = ccall(
+        (:xmlTextReaderIsEmptyElement, libxml2),
+        Cint,
+        (Ptr{Cvoid},),
+        reader.ptr)
+    @assert r ≥ 0 "XML Error Detected"
+    return r == 1
+end
+
+"""
     namespace(reader::StreamReader)
 
 Return the namespace of the current node of `reader`.
@@ -482,6 +500,8 @@ function namespace(reader::StreamReader)
     end
     return unsafe_string(ns_ptr)
 end
+
+
 
 """
     expandtree(reader::StreamReader)
